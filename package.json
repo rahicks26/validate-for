@@ -1,0 +1,22 @@
+{
+  "name": "validate-this",
+  "version": "1.0.0",
+  "description": "A simple libary that uses the builder pattern to validate values and objects in js",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "validation",
+    "builder-pattern"
+  ],
+  "author": "rahicks26",
+  "license": "ISC",
+  "private": false,
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
+    "babel-jest": "^25.1.0",
+    "jest": "^25.1.0"
+  }
+}
