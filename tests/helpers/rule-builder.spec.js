@@ -85,10 +85,10 @@ describe('rule-set/builder.js', () => {
     const rb = new RuleBuilder().must(fn);
 
     const sut = rb.evaluate(null);
-    expect(sut.isValid).toEqual(false);
+    expect(sut.isValid).toEqual(undefined);
   });
 
-  it('When evaluate is called with multiple constraints it returns true if all inputs return truthy', () => {
+  it('When evaluate is called with multiple constraints it returns an object with isValid set to true if all inputs return truthy', () => {
     const fn = (value) => !!value;
     const fn1 = (value) => value < 3;
     const fn2 = (value) => value > 1;

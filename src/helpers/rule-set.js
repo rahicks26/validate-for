@@ -1,15 +1,16 @@
-import { List } from 'immutable';
+import { Map } from 'immutable';
 import RuleBuilder from './rule-builder';
 
 class RuleSet {
   constructor() {
-    this.ruleBuilders = new List();
+    this.ruleBuilders = new Map();
   }
 
-  register(nameOrGetter, rule) {
+  register(name, rule) {
     if (rule instanceof RuleBuilder) {
-      const namedRule = rule.withGetter(nameOrGetter);
-      this.ruleBuilders = this.ruleBuilders.push(namedRule);
+      const copy = rule.copy();
+      copy.name = name;
+      this.ruleBuilders = this.ruleBuilders.set(name, copy);
     }
     return this;
   }

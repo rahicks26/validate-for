@@ -1,15 +1,16 @@
 import { List } from 'immutable';
 import { cloneDeep } from 'lodash';
 import rules from './rules';
+import utils from './utils';
 
 class RuleBuilder {
-  constructor() {
-    this.name = null;
+  constructor(name) {
+    this.name = name;
     this.displayName = 'Property';
     this.constraints = new List();
     this.preserveContextRef = false;
     this.ctx = {};
-    this.getter = (ctx) => (ctx ? ctx[this.name] : undefined);
+    this.getter = null;
   }
 
   // =======================================
@@ -67,17 +68,12 @@ class RuleBuilder {
   }
 
   withGetter(nameOrFunc) {
-    if (nameOrFunc) {
-      if (rules.isFunction(nameOrFunc)) {
-        const copy = this.copy();
-        copy.getter = nameOrFunc;
-        return copy;
-      }
-      if (rules.isString(nameOrFunc)) {
-        const copy = this.copy();
-        copy.name = nameOrFunc;
-        return copy;
-      }
+    if (rules.isFunction(nameOrFunc) || rules.isString(nameOrFunc)) {
+      const copy = this.copy();
+      copy.getter = rules.isString(nameOrFunc)
+        ? utils.propertyAccessorFromName(nameOrFunc)
+        : nameOrFunc;
+      return copy;
     }
     return this;
   }
@@ -94,11 +90,15 @@ class RuleBuilder {
   }
 
   evaluate(value) {
-    const { ctx } = this;
-    const errors = this.constraints.filter((con) => !con.must(value, ctx));
-    return errors.isEmpty()
-      ? { name: this.name, isValid: true }
-      : { name: this.name, isValid: false, error: `${this.displayName} ${errors.first().message}` };
+    try {
+      const { ctx } = this;
+      const errors = this.constraints.filter((con) => !con.must(value, ctx));
+      return errors.isEmpty()
+        ? { name: this.name, isValid: true }
+        : { name: this.name, error: `${this.displayName} ${errors.first().message}` };
+    } catch (err) {
+      return { name: this.name, evalFailed: true, exception: err };
+    }
   }
 
   // Returns evaluate ran under the provided context.
@@ -114,9 +114,17 @@ class RuleBuilder {
     return true;
   }
 
-  asFunc(ctx) {
-    const rule = this.withContext(ctx);
-    return (value) => rule.evaluate(value);
+  asFunc(ctx, notDeepCopied = false) {
+    if (ctx) {
+      const context = notDeepCopied ? cloneDeep(ctx) : ctx;
+      const rule = this.withContext(context);
+      return (value) => rule.evaluate(value);
+    }
+    const copy = this.copy();
+    return (value, context) => {
+      const underCtx = copy.withContext(context, notDeepCopied);
+      return underCtx.evaluate(value);
+    };
   }
 }
 
