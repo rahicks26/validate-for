@@ -95,8 +95,10 @@ class RuleBuilder {
 
   evaluate(value) {
     const { ctx } = this;
-    const errors = this.constraints.filter((con) => !!con.must(value, ctx));
-    return errors.isEmpty() ? [] : { name: this.name, error: `${this.displayName} ${errors.first().message}` };
+    const errors = this.constraints.filter((con) => !con.must(value, ctx));
+    return errors.isEmpty()
+      ? { name: this.name, isValid: true }
+      : { name: this.name, isValid: false, error: `${this.displayName} ${errors.first().message}` };
   }
 
   // Returns evaluate ran under the provided context.

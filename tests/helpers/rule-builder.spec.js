@@ -6,26 +6,12 @@ describe('rule-set/builder.js', () => {
     expect(sut).toBeInstanceOf(RuleBuilder);
     expect(sut.constraints.count()).toBe(0);
   });
-  it('When a ruleBuilder is created with a name it is set', () => {
-    const name = 'I am bob';
-    const sut = new RuleBuilder(name);
-    expect(sut.name).toBe(name);
-  });
 
   it('When a ruleBuilder is copied it was a deep copy', () => {
     const rb = new RuleBuilder();
     const sut = rb.copy();
     expect(sut).toEqual(rb);
     expect(sut).not.toBe(rb);
-  });
-
-  it('When a ruleBuilder with a name is copied it was a deep copy', () => {
-    const name = 'I am not bob';
-    const rb = new RuleBuilder(name);
-    const sut = rb.copy();
-    expect(sut).toEqual(rb);
-    expect(sut).not.toBe(rb);
-    expect(sut.name).toBe(name);
   });
 
   it('When must is called on a ruleBuilder without providing a valid function the same instance is returned', () => {
@@ -77,42 +63,42 @@ describe('rule-set/builder.js', () => {
 
     const result = rb.evaluate(value);
     expect(fn).toBeCalled();
-    expect(func(value)).toBe(result);
+    expect(result.message).not.toBeNull();
   });
 
   it('When evaluate is called with two constraints then each constraint to be called with the value.', () => {
+    const ctx = {};
     const fn = jest.fn().mockReturnThis(true);
     const fn2 = jest.fn().mockReturnThis(false);
-    const rb = new RuleBuilder().must(fn).must(fn2);
+    const rb = new RuleBuilder().must(fn).must(fn2).withContext(ctx);
     const value = null;
 
     rb.evaluate(value);
     expect(fn).toBeCalledTimes(1);
-    expect(fn).toBeCalledWith(value);
+    expect(fn).toBeCalledWith(value, ctx);
     expect(fn2).toBeCalledTimes(1);
-    expect(fn2).toBeCalledWith(value);
+    expect(fn2).toBeCalledWith(value, ctx);
   });
 
-  it('When evaluate is called with a constraint it returns the truthy result of the constraint', () => {
+  it('When evaluate is called with a constraint and an invalid value the invalid flag is set to true.', () => {
     const fn = (value) => value;
     const rb = new RuleBuilder().must(fn);
 
     const sut = rb.evaluate(null);
-    expect(sut).toBe(false);
+    expect(sut.isValid).toEqual(false);
   });
 
   it('When evaluate is called with multiple constraints it returns true if all inputs return truthy', () => {
-    const fn = (value) => value;
+    const fn = (value) => !!value;
     const fn1 = (value) => value < 3;
     const fn2 = (value) => value > 1;
     const fn3 = (value) => Math.floor(value) === value;
-    const rb = new RuleBuilder().must(fn).must(fn1).must(fn2)
-      .must(fn3);
+    const rb = new RuleBuilder().must(fn, 'err 0').must(fn1, 'err 1').must(fn2, 'err 2')
+      .must(fn3, 'err 3');
 
-    const value = 2;
-    const expected = fn(value) && fn1(value) && fn2(value) && fn3(value);
+    const v = 2;
 
-    const sut = rb.evaluate(value);
-    expect(sut).toBe(expected);
+    const sut = rb.evaluate(v);
+    expect(sut.isValid).toBe(true);
   });
 });

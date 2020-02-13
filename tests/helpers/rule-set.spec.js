@@ -15,7 +15,7 @@ describe('rule-set/set.js', () => {
     rs.register('likesCookies', rule);
 
     expect(rs.ruleBuilders.isEmpty()).toBe(false);
-    expect(rs.ruleBuilders.get('likesCookies').name).toBe('likesCookies');
+    expect(rs.ruleBuilders.first().name).toBe('likesCookies');
   });
 
   it('When register is called the provided rule is not a valid rule instance then it does nothing', () => {
