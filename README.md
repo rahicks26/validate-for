@@ -8,7 +8,7 @@ for both entire objects and single values. At the heart of this
 project is the rule builder class. To create a new rule use the 
 rule method.
 
-```
+```javascript
 const myRule = rule();
 ```
 
@@ -16,7 +16,7 @@ Once you have an instance of a ruleBuilder you will be able to
 use its builder methods to build out custom validation rules. 
 Such as:
 
-```
+```javascript
 const myRuleWithConstraint = myRule.must(..)
 const myRuleWithContext = myRule.withContext(..)
 const myRuleWithDisplayName = myRule.withDisplayName(..)
@@ -27,18 +27,18 @@ Each of these methods will return a new instance of the rule
 with the requested method applied to only the new instance.
 This is to make it easier to chain rule together like so:
 
-```
-  const ctx = {prop:'I am hungry'}
-  const myRule = rule()
-    .must((value)=> !!value)  //Make sure the value is truthy
-    .must((value,ctx)=> value !== ctx.prop) // Make sure the value is not equal prop
-    .withContext(ctx,true) // Sets the context and makes sure the reference to the original model is preserved
+```javascript
+const ctx = {prop:'I am hungry'}
+const myRule = rule()
+  .must((value)=> !!value)  //Make sure the value is truthy
+  .must((value,ctx)=> value !== ctx.prop) // Make sure the value is not equal prop
+  .withContext(ctx,true) // Sets the context and makes sure the reference to the original model is preserved
 
-  ctx.prop2 = 'I am Full'
+ctx.prop2 = 'I am Full'
 
-  const myRule2 = myRule
-    .withContext(ctx) // Sets the context to be cloned each time this will preserve the state of the context when withContext was called
-    .must((value, ctx)=> value !=== ctx.prop2 )
+const myRule2 = myRule
+  .withContext(ctx) // Sets the context to be cloned each time this will preserve the state of the context when withContext was called
+  .must((value, ctx)=> value !=== ctx.prop2 )
 
 ```
 
@@ -48,7 +48,7 @@ configuration such as all fields are required.
 
 Now to evaluate a rule you have 3 helper functions
 
-```
+```javascript
 const myRule = rule.must(v=>v)
 
 // To evaluate against a value all you have to do is pass the value,
