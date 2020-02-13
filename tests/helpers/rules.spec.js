@@ -1,4 +1,4 @@
-import rules from '../src/rules';
+import rules from '../../src/helpers/rules';
 
 describe('ValidationRules.js', () => {
   it('When isNull is passed null returns true', () => {
@@ -143,21 +143,6 @@ describe('ValidationRules.js', () => {
   it('When isUserName is not passed an email returns false', () => {
     const value = 'testing';
     const result = rules.isEmail(value);
-    expect(result).toBe(false);
-  });
-  it('When isUserName is passed an email returns false', () => {
-    const value = 'test@dev.com';
-    const result = rules.isUserName(value);
-    expect(result).toBe(false);
-  });
-  it('When isUserName is passed a string that is not an email returns true', () => {
-    const value = 'tester';
-    const result = rules.isUserName(value);
-    expect(result).toBe(true);
-  });
-  it('When isUserName  is passed a string of 100 characters returns false', () => {
-    const value = 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean m';
-    const result = rules.isUserName(value);
     expect(result).toBe(false);
   });
 });
