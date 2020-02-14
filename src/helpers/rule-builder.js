@@ -7,7 +7,7 @@ class RuleBuilder {
     this.name = name;
     this.displayName = 'Property';
     this.constraints = new List();
-    this.preserveContextRef = false;
+    this.cloneContextOnCopy = false;
     this.ctx = {};
     this.getter = null;
   }
@@ -28,7 +28,7 @@ class RuleBuilder {
   // the configuration of the rule.
   copy() {
     const copy = cloneDeep(this);
-    if (this.preserveContextRef) {
+    if (!this.cloneContextOnCopy) {
       copy.ctx = this.ctx;
     }
     return copy;
@@ -79,11 +79,11 @@ class RuleBuilder {
   }
 
   // Returns a copy of the rule
-  withContext(ctx, notDeepCopied = false) {
+  withContext(ctx, deepCopied = false) {
     if (ctx) {
       const copy = this.copy();
       copy.ctx = ctx;
-      copy.preserveContextRef = notDeepCopied;
+      copy.cloneContextOnCopy = deepCopied;
       return copy;
     }
     return this;
@@ -114,15 +114,15 @@ class RuleBuilder {
     return true;
   }
 
-  asFunc(ctx, notDeepCopied = false) {
+  asFunc(ctx, deepCopied = false) {
     if (ctx) {
-      const context = notDeepCopied ? cloneDeep(ctx) : ctx;
+      const context = deepCopied ? cloneDeep(ctx) : ctx;
       const rule = this.withContext(context);
       return (value) => rule.evaluate(value);
     }
     const copy = this.copy();
     return (value, context) => {
-      const underCtx = copy.withContext(context, notDeepCopied);
+      const underCtx = copy.withContext(context, deepCopied);
       return underCtx.evaluate(value);
     };
   }
