@@ -4,7 +4,7 @@
   "description": "A simple library that uses the builder pattern to validate values and objects in js",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage",
     "build":"./node_modules/.bin/babel src --out-dir dist"
   },
   "keywords": [
