@@ -1,8 +1,8 @@
 {
-  "name": "validate-this",
-  "version": "1.0.0",
+  "name": "validate-for",
+  "version": "1.0.1",
   "description": "A simple library that uses the builder pattern to validate values and objects in js",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "jest --coverage",
     "build":"./node_modules/.bin/babel src --out-dir dist"

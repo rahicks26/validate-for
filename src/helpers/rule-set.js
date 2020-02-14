@@ -15,16 +15,19 @@ class RuleSet {
     return this;
   }
 
-  validate(ctx) {
-    return this.ruleBuilders.map((rb, name) => ({ name, error: rb.validateFor(ctx) }));
+  get(name) {
+    return this.ruleBuilders.get(name);
   }
 
-  validatorFor(name, ctx) {
+  validate(ctx) {
+    return this.ruleBuilders.map((rb) => rb.evaluateFor(ctx)).toArray();
+  }
+
+  validatorFor(name, ctx, deepCopy = false) {
     if (name) {
       const rule = this.ruleBuilders.get(name);
       if (rule instanceof RuleBuilder) {
-        const context = ctx || rule.ctx;
-        return rule.asFunc(context);
+        return rule.asFunc(ctx, deepCopy);
       }
     }
     return undefined;
