@@ -1,6 +1,6 @@
 {
   "name": "validate-for",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A simple library that uses the builder pattern to validate values and objects in js",
   "main": "dist/index.js",
   "scripts": {
