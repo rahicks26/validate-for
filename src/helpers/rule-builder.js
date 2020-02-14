@@ -1,7 +1,6 @@
 import { List } from 'immutable';
 import { cloneDeep } from 'lodash';
-import rules from './rules';
-import utils from './utils';
+import utils from 'get-prop-by-name';
 
 class RuleBuilder {
   constructor(name) {
@@ -47,7 +46,7 @@ class RuleBuilder {
   // via the copy method with this function
   // added to the constraints as a requirement.
   must(func, message = null) {
-    if (rules.isFunction(func)) {
+    if (typeof func === 'function') {
       const copy = this.copy();
       const msg = message || 'is in invalid.';
       const constraint = { must: func, message: msg };
@@ -68,9 +67,10 @@ class RuleBuilder {
   }
 
   withGetter(nameOrFunc) {
-    if (rules.isFunction(nameOrFunc) || rules.isString(nameOrFunc)) {
+    const isString = typeof nameOrFunc === 'string';
+    if (typeof nameOrFunc === 'function' || isString) {
       const copy = this.copy();
-      copy.getter = rules.isString(nameOrFunc)
+      copy.getter = isString
         ? utils.propertyAccessorFromName(nameOrFunc)
         : nameOrFunc;
       return copy;
