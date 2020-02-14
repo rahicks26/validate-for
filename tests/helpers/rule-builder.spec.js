@@ -1,16 +1,43 @@
 import RuleBuilder from '../../src/helpers/rule-builder';
 
 describe('rule-set/builder.js', () => {
-  it('When a new rule is created it has an empty constraints list', () => {
+  it('When a rule is created it does not need a name', () => {
     const sut = new RuleBuilder();
     expect(sut).toBeInstanceOf(RuleBuilder);
-    expect(sut.constraints.count()).toBe(0);
+  });
+
+  it('When withContext is called it creates a new rule instance', () => {
+    const ctx = { name: 'name' };
+    const rb = new RuleBuilder();
+    const sut = rb.withContext(ctx, true);
+    expect(sut).not.toBe(rb);
+  });
+
+  it('When withContext is called with a falsy ctx it returns the current instance', () => {
+    const ctx = null;
+    const rb = new RuleBuilder();
+    const sut = rb.withContext(ctx, true);
+    expect(sut).toBe(rb);
   });
 
   it('When a ruleBuilder is copied it was a deep copy', () => {
     const rb = new RuleBuilder();
     const sut = rb.copy();
     expect(sut).toEqual(rb);
+    expect(sut).not.toBe(rb);
+  });
+
+  it('When withDisplayName is called it returns an new instance of a ruleBuilder', () => {
+    const name = 'bob';
+    const rb = new RuleBuilder();
+    const sut = rb.withDisplayName(name);
+    expect(sut).not.toBe(rb);
+  });
+
+  it('When withDisplayName is called it returns an new instance of a ruleBuilder', () => {
+    const name = 'bob';
+    const rb = new RuleBuilder();
+    const sut = rb.withDisplayName(name);
     expect(sut).not.toBe(rb);
   });
 
@@ -26,33 +53,11 @@ describe('rule-set/builder.js', () => {
     expect(rb).not.toBe(sut);
   });
 
-  it('When must is called on a ruleBuilder with a valid function it adds that function as a constraint', () => {
-    const func = (value) => !!value;
-    const rb = new RuleBuilder().must(func);
-    const sut = rb.constraints.first().must;
-    expect(sut).toBe(func);
-  });
-
-  it('When must is chained on a ruleBuilder all of the constraints are added to the final builder', () => {
-    const func = (value) => !!value;
-    const func2 = (value) => !value;
-    const rb = new RuleBuilder().must(func).must(func2);
-    const sut = rb.constraints;
-    expect(sut.first().must).toBe(func);
-    expect(sut.last().must).toBe(func2);
-  });
-
-  it('When must is not passed a message it defaults to a valid message.', () => {
-    const rb = new RuleBuilder().must(() => true);
-    const sut = rb.constraints.first().message;
-    expect(sut).not.toBeNull();
-  });
-
-  it('When must is passed a message on a ruleBuilder it is updated to that message', () => {
-    const msg = 'my message';
-    const rb = new RuleBuilder().must(() => true, msg);
-    const sut = rb.constraints.first().message;
-    expect(sut).toBe(msg);
+  it('When must is called on a ruleBuilder with a valid function an a message the message will be returned on errors for that rule', () => {
+    const rb = new RuleBuilder();
+    const msg = 'Hi!';
+    const sut = rb.must((v) => v === true, msg).evaluate(false);
+    expect(sut.error).toContain(msg);
   });
 
   it('When evaluate is called with one constraint that constraint is evaluated and the result is returned.', () => {
@@ -100,5 +105,122 @@ describe('rule-set/builder.js', () => {
 
     const sut = rb.evaluate(v);
     expect(sut.isValid).toBe(true);
+  });
+
+  it('When withDisplayName is called with an undefined name the default name is still used', () => {
+    const sut = new RuleBuilder().withDisplayName(null).must((v) => v === 1).evaluate(2);
+    expect(sut.error).toContain('Property');
+  });
+
+  it('When withDisplay is called and the a valid string is passed the error will contain that display name', () => {
+    const displayName = 'Error';
+    const sut = new RuleBuilder().withDisplayName(displayName).must((v) => v === 1).evaluate(2);
+    expect(sut.error).toContain(displayName);
+  });
+
+  it('When withContext is called in the chain and a rule uses the context it will be used', () => {
+    const ctx = { name: 'bob' };
+    const sut = new RuleBuilder().withContext(ctx).must((v, c) => v === c.name).evaluate(ctx.name);
+    expect(sut.isValid).toBe(true);
+  });
+
+  it('When with getter is set by name that name will be used when evaluateFor is called', () => {
+    const ctx = { type: 'ford' };
+    const sut = new RuleBuilder().withContext(ctx).withGetter('type').must((v) => v.includes('f'))
+      .evaluateFor({ type: 'dodge' });
+    expect(sut.isValid).toBe(undefined);
+  });
+
+  it('When withGetter is set by function the function will be used when evaluateFor is called', () => {
+    const ctx = { type: 'ford' };
+    const fn = jest.fn((c) => c.type);
+    const sut = new RuleBuilder().withContext(ctx).withGetter(fn).must((v) => v.includes('f'))
+      .evaluateFor(ctx);
+    expect(fn).toBeCalled();
+    expect(fn).toBeCalledWith(ctx);
+    expect(sut.isValid).toBe(true);
+  });
+
+  it('When withGetter is called and the param is falsy it has no effect', () => {
+    try {
+      const ctx = { type: 'ford' };
+      const sut = new RuleBuilder().withContext(ctx).withGetter().must((v) => v.includes('f'))
+        .evaluateFor({ type: 'dodge' });
+      expect(sut.isValid).toBe(undefined);
+    } catch (err) {
+      expect(err).toBeInstanceOf(TypeError);
+    }
+  });
+
+  it('When a must constraint cannot evaluate the expression b/c of an exception an error is returned', () => {
+    const ctx = { type: 'ford' };
+    const sut = new RuleBuilder().withContext(ctx).must((v) => v.incls('f')).evaluate('tom');
+    expect(sut.evalFailed).toBe(true);
+  });
+
+  it('When evaluateFor is called with out a getter being set an error is returned', () => {
+    const ctx = { type: 'ford' };
+    const sut = new RuleBuilder().withContext(ctx).must((v) => v.includes('f')).evaluateFor({ type: 'boss' });
+    expect(sut.evalFailed).toBe(true);
+  });
+
+  it('When evaluateFor is passed a falsy ctx it returns isValid as true', () => {
+    const ctx = { type: 'ford' };
+    const sut = new RuleBuilder().withContext(ctx).must((v) => v.includes('f')).evaluateFor(null);
+    expect(sut.isValid).toBe(true);
+  });
+
+  it('When asFunc is called it returns a function', () => {
+    const rb = new RuleBuilder().must((v) => !!v).withGetter('home');
+
+    const sut0 = rb.asFunc();
+    expect(sut0).toBeInstanceOf(Function);
+
+    const sut1 = rb.asFunc({ home: 'boston' });
+    expect(sut1).toBeInstanceOf(Function);
+  });
+
+  it('When asFunc is called with a ctx the context is captured in the func', () => {
+    const rb = new RuleBuilder().must((v, c) => v === c.home).withGetter('home');
+
+    const sut = rb.asFunc({ home: 'boston' });
+    expect(sut).toBeInstanceOf(Function);
+    expect(sut('boston').isValid).toBe(true);
+    expect(sut('austin').isValid).toBe(undefined);
+  });
+
+  it('When asFunc is called without a context it can be passed in', () => {
+    const rb = new RuleBuilder().must((v, c) => v === c.home).withGetter('home');
+
+    const sut = rb.asFunc();
+    expect(sut).toBeInstanceOf(Function);
+    expect(sut('boston', { home: 'boston' }).isValid).toBe(true);
+    expect(sut('austin', { home: 'boston' }).isValid).toBe(undefined);
+  });
+
+  it('When the cosntext is set to deep copy it does not get udpated by the the instance', () => {
+    const ctx = { base: 'LRAF' };
+    const rb = new RuleBuilder().withContext(ctx, true).must((v, c) => c.includes('Q') && v.includes('Q'));
+    ctx.base = 'QRX';
+    const sut0 = rb.evaluate('Q');
+    expect(sut0.isValid).toBe(undefined);
+  });
+
+  it('When the cosntext is set to deep copy it does not get udpated by the the instance', () => {
+    const ctx = { base: 'LRAF' };
+    const rb = new RuleBuilder().withContext(ctx).must((v, c) => c.base.includes('Q') && v.includes('Q'));
+    ctx.base = 'QRX';
+    const sut0 = rb.evaluate('Q');
+    expect(sut0.isValid).toBe(true);
+  });
+
+  it('When asFunc is called with a ctx the context can be set to be deep copied', () => {
+    const rb = new RuleBuilder().must((v, c) => v === c.home).withGetter('home');
+    const ctx = { home: 'boston' };
+    const sut = rb.asFunc(ctx, true);
+    ctx.home = null;
+    expect(sut).toBeInstanceOf(Function);
+    expect(sut('boston').isValid).toBe(true);
+    expect(sut('austin').isValid).toBe(undefined);
   });
 });

@@ -78,7 +78,18 @@ class RuleBuilder {
     return this;
   }
 
-  // Returns a copy of the rule
+  // ==========================================
+  // Description:
+  // Sets the context for a constraint to be
+  // ran under. This can be any javascript
+  // object.
+  // ==========================================
+  // Returns:
+  // A new rule builder that has been copied
+  // via the copy method with the context
+  // set iff the context was defined and
+  // it also sets the cloneContextOnCopy
+  // if the context is defined.
   withContext(ctx, deepCopied = false) {
     if (ctx) {
       const copy = this.copy();
@@ -107,11 +118,15 @@ class RuleBuilder {
   evaluateFor(ctx) {
     if (ctx) {
       const copy = this.copy();
-      const value = copy.getter(ctx);
-      copy.withContext(ctx);
-      return copy.evaluate(value);
+      try {
+        const value = copy.getter(ctx);
+        copy.withContext(ctx);
+        return copy.evaluate(value);
+      } catch (err) {
+        return { name: this.name, evalFailed: true, exception: err };
+      }
     }
-    return true;
+    return { name: this.name, isValid: true };
   }
 
   asFunc(ctx, deepCopied = false) {
