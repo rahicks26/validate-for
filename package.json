@@ -1,10 +1,11 @@
 {
-  "name": "validate-this",
-  "version": "1.0.0",
-  "description": "A simple libary that uses the builder pattern to validate values and objects in js",
-  "main": "index.js",
+  "name": "validate-for",
+  "version": "1.0.1",
+  "description": "A simple library that uses the builder pattern to validate values and objects in js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --coverage",
+    "build":"./node_modules/.bin/babel src --out-dir dist"
   },
   "keywords": [
     "validation",
@@ -14,9 +15,19 @@
   "license": "ISC",
   "private": false,
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.4",
     "@babel/preset-env": "^7.8.4",
+    "@types/jest": "^25.1.2",
     "babel-jest": "^25.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.20.1",
     "jest": "^25.1.0"
+  },
+  "dependencies": {
+    "get-prop-by-name": "^1.0.1",
+    "immutable": "^4.0.0-rc.12",
+    "lodash": "^4.17.15"
   }
 }
