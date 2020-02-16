@@ -1,21 +1,10 @@
-import RuleSet from '../../src/helpers/rule-set';
-import RuleBuilder from '../../src/helpers/rule-builder';
+import RuleSet from '../../../src/helpers/rule-set';
+import RuleBuilder from '../../../src/helpers/rule-builder';
 
 describe('rule-set/set.js', () => {
   it('When constructed with no prams creates a default set', () => {
     const sut = new RuleSet();
     expect(sut).toBeInstanceOf(RuleSet);
-  });
-
-  it('When a rule is registered it can be retrieved by name', () => {
-    const rs = new RuleSet();
-    const rule = new RuleBuilder().must((v) => v === 1);
-    const name = 'name';
-    rs.register(name, rule);
-    const sut = rs.get(name);
-
-    expect(sut).toBeDefined();
-    expect(sut.evaluate(1).isValid).toEqual(rule.evaluate(1).isValid);
   });
 
   it('When register is called the provided rule is not a valid rule instance then it does nothing', () => {

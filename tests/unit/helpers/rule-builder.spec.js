@@ -1,4 +1,4 @@
-import RuleBuilder from '../../src/helpers/rule-builder';
+import RuleBuilder from '../../../src/helpers/rule-builder';
 
 describe('rule-set/builder.js', () => {
   it('When a rule is created it does not need a name', () => {

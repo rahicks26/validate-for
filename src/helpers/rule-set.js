@@ -3,20 +3,15 @@ import RuleBuilder from './rule-builder';
 
 class RuleSet {
   constructor() {
-    this.ruleBuilders = new Map();
+    this.ruleBuilders = Map();
   }
 
   register(name, rule) {
     if (rule instanceof RuleBuilder) {
-      const copy = rule.copy();
-      copy.name = name;
+      const copy = rule.copy(name);
       this.ruleBuilders = this.ruleBuilders.set(name, copy);
     }
     return this;
-  }
-
-  get(name) {
-    return this.ruleBuilders.get(name);
   }
 
   validate(ctx) {
