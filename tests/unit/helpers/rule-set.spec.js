@@ -58,6 +58,6 @@ describe('rule-set/set.js', () => {
     const rs = new RuleSet();
     rs.register('name', new RuleBuilder().must((v) => v === 'name'));
     const sut = rs.validate({ name: 'name' });
-    expect(sut.filter((r) => !r.isValid)).toBe([]);
+    expect(sut.filter((r) => !r.isValid)).toEqual([]);
   });
 });

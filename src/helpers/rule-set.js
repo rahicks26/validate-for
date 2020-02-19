@@ -15,7 +15,7 @@ class RuleSet {
   }
 
   validate(ctx) {
-    return this.ruleBuilders.map((rb) => rb.evaluateFor(ctx)).toArray();
+    return this.ruleBuilders.map((rb) => rb.evaluateFor(ctx)).toList().toArray();
   }
 
   validatorFor(name, ctx, deepCopy = false) {
