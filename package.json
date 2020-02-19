@@ -1,6 +1,6 @@
 {
   "name": "validate-for",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "A simple library that uses the builder pattern to validate values and objects in js",
   "main": "dist/index.js",
   "scripts": {
@@ -14,6 +14,7 @@
   "author": "rahicks26",
   "license": "ISC",
   "private": false,
+  "files": ["dist", "README.md","package.json"],
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.4",

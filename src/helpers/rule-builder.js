@@ -1,25 +1,33 @@
+/* eslint no-underscore-dangle:
+  ["error",
+    { "allow":
+      ["_name", "_displayName", "_getter", "_ctx", "_constraints", "_cloneContextOnCopy"]
+    }]
+
+*/
+
 import { List } from 'immutable';
 import { cloneDeep } from 'lodash';
 import utils from 'get-prop-by-name';
 
 class RuleBuilder {
   constructor(name) {
-    this.name = name;
-    this.displayName = 'Property';
-    this.constraints = List();
-    this.cloneContextOnCopy = false;
-    this.ctx = {};
-    this.getter = null;
+    this._name = name;
+    this._displayName = 'Property';
+    this._constraints = List();
+    this._cloneContextOnCopy = false;
+    this._ctx = {};
+    this._getter = null;
   }
 
   copy(name = null) {
     const copy = cloneDeep(this);
-    if (!this.cloneContextOnCopy) {
-      copy.ctx = this.ctx;
+    if (!this._cloneContextOnCopy) {
+      copy._ctx = this._ctx;
     }
     if (name) {
-      copy.name = name;
-      this.getter = utils.propertyAccessorFromName(name);
+      copy._name = name;
+      copy._getter = utils.propertyAccessorFromName(name);
     }
     return copy;
   }
@@ -29,8 +37,8 @@ class RuleBuilder {
       const copy = this.copy();
       const msg = message || 'is in invalid.';
       const constraint = { must: func, message: msg };
-      const constraints = this.constraints.push(constraint);
-      copy.constraints = constraints;
+      const constraints = this._constraints.push(constraint);
+      copy._constraints = constraints;
       return copy;
     }
     return this;
@@ -39,7 +47,7 @@ class RuleBuilder {
   withDisplayName(name) {
     if (name) {
       const copy = this.copy();
-      copy.displayName = name;
+      copy._displayName = name;
       return copy;
     }
     return this;
@@ -49,7 +57,7 @@ class RuleBuilder {
     const isString = typeof nameOrFunc === 'string';
     if (typeof nameOrFunc === 'function' || isString) {
       const copy = this.copy();
-      copy.getter = isString
+      copy._getter = isString
         ? utils.propertyAccessorFromName(nameOrFunc)
         : nameOrFunc;
       return copy;
@@ -60,8 +68,8 @@ class RuleBuilder {
   withContext(ctx, deepCopied = false) {
     if (ctx) {
       const copy = this.copy();
-      copy.ctx = ctx;
-      copy.cloneContextOnCopy = deepCopied;
+      copy._ctx = ctx;
+      copy._cloneContextOnCopy = deepCopied;
       return copy;
     }
     return this;
@@ -69,13 +77,13 @@ class RuleBuilder {
 
   evaluate(value) {
     try {
-      const { ctx } = this;
-      const errors = this.constraints.filter((con) => !con.must(value, ctx));
+      const { _ctx: ctx } = this;
+      const errors = this._constraints.filter((con) => !con.must(value, ctx));
       return errors.isEmpty()
-        ? { name: this.name, isValid: true }
-        : { name: this.name, error: `${this.displayName} ${errors.first().message}` };
+        ? { name: this._name, isValid: true }
+        : { name: this._name, error: `${this._displayName} ${errors.first().message}` };
     } catch (err) {
-      return { name: this.name, evalFailed: true, exception: err };
+      return { name: this._name, evalFailed: true, exception: err };
     }
   }
 
@@ -83,14 +91,14 @@ class RuleBuilder {
     if (ctx) {
       const copy = this.copy();
       try {
-        const value = copy.getter(ctx);
+        const value = copy._getter(ctx);
         copy.withContext(ctx);
         return copy.evaluate(value);
       } catch (err) {
-        return { name: this.name, evalFailed: true, exception: err };
+        return { name: this._name, evalFailed: true, exception: err };
       }
     }
-    return { name: this.name, isValid: true };
+    return { name: this._name, isValid: true };
   }
 
   asFunc(ctx, deepCopied = false) {

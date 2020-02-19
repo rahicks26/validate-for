@@ -53,4 +53,11 @@ describe('rule-set/set.js', () => {
     const sut = rs.validatorFor('', { rule2: 10 });
     expect(sut).toBe(undefined);
   });
+
+  it('When a rule is named the name is used as a default getter', () => {
+    const rs = new RuleSet();
+    rs.register('name', new RuleBuilder().must((v) => v === 'name'));
+    const sut = rs.validate({ name: 'name' });
+    expect(sut.filter((r) => !r.isValid)).toBe([]);
+  });
 });
