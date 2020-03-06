@@ -89,10 +89,9 @@ class RuleBuilder {
 
   evaluateFor(ctx) {
     if (ctx) {
-      const copy = this.copy();
+      const copy = this.withContext(ctx);
       try {
         const value = copy._getter(ctx);
-        copy.withContext(ctx);
         return copy.evaluate(value);
       } catch (err) {
         return { name: this._name, evalFailed: true, exception: err };
